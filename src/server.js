@@ -3,14 +3,22 @@ if (process.env.NODE_ENV !== 'production') {
   }
 
 const express = require('express')
+const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer')
+const fs = require('fs');
 const app = express()
 const port = 6000
+
+app.use(bodyParser.json());
 
 user = process.env.USER
 pass = process.env.PASS
 
-app.get('/send', (req, res) => {
+const htmlContent = fs.readFileSync('./src/html/index.html', 'utf8');
+
+app.post('/send', (req, res) => {
+
+    const { to, replyTo, html } = req.body.parametros;
 
     const transporte = nodemailer.createTransport({
         host: "smtp.umbler.com",
@@ -18,17 +26,21 @@ app.get('/send', (req, res) => {
         auth:{ user, pass }
     })
 
-    transporte.sendMail({
+    const mailOptions = {
         from: user,
-        to: "douglas.tecnico.info@gmail.com",
-        replayTo: "oultimoelias@gmail.com",
-        subject: "Sua inscrição foi confirmada",
-        text: "Olá, recebemos sua inscrição"
-    }).then(info=> {
-        res.send(info)
-    }).catch(error=> {
-        res.send(error)
-    })
+        to: to,
+        replyTo: replyTo,
+        subject: "Inscrição",
+        html: html
+    };
+
+    transporte.sendMail(mailOptions)
+        .then(info => {
+            res.send(info);
+        })
+        .catch(error => {
+            res.send(error);
+        });
 })
 
 app.listen(port, () => console.log(`Runnig on port ${port}!`))
